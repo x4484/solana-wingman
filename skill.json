@@ -1,0 +1,59 @@
+{
+  "name": "solana-wingman",
+  "version": "0.1.0",
+  "description": "Solana development tutor and builder. Teaches program development through Solana-native challenges, Anchor framework, and security best practices.",
+  "author": "Rani",
+  "license": "MIT",
+  "repository": "https://github.com/solana-wingman/solana-wingman",
+  "keywords": [
+    "solana",
+    "anchor",
+    "rust",
+    "blockchain",
+    "web3",
+    "smart-contracts",
+    "defi",
+    "nft"
+  ],
+  "triggers": [
+    "solana",
+    "anchor",
+    "rust program",
+    "spl token",
+    "metaplex",
+    "nft solana",
+    "pda",
+    "compressed nft",
+    "solana development"
+  ],
+  "capabilities": [
+    "teach solana concepts",
+    "scaffold anchor projects",
+    "write solana programs",
+    "review program security",
+    "debug transactions",
+    "explain pdas",
+    "token operations",
+    "nft creation"
+  ],
+  "files": {
+    "skill": "skills/solana-wingman/SKILL.md",
+    "agents": "AGENTS.md",
+    "cursorrules": ".cursorrules"
+  },
+  "knowledge": {
+    "challenges": "knowledge/challenges/",
+    "foundations": "knowledge/foundations/",
+    "gotchas": "knowledge/gotchas/",
+    "protocols": "knowledge/protocols/",
+    "standards": "knowledge/standards/"
+  },
+  "tools": {
+    "anchor": "tools/anchor/",
+    "solana-cli": "tools/solana-cli/",
+    "security": "tools/security/"
+  },
+  "scripts": {
+    "init": "skills/solana-wingman/scripts/init-project.sh"
+  }
+}
