@@ -1,0 +1,165 @@
+{
+  "description": "Major Solana protocol addresses and program IDs",
+  "lastUpdated": "2026-01-27",
+  "mainnet": {
+    "jupiter": {
+      "name": "Jupiter",
+      "description": "Leading DEX aggregator on Solana",
+      "website": "https://jup.ag",
+      "programs": {
+        "JUPITER_V6": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
+        "JUPITER_LIMIT_ORDER": "jupoNjAxXgZ4rjzxzPMP4oxduvQsQtZzyknqvzYNrNu",
+        "JUPITER_DCA": "DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M",
+        "JUPITER_PERPETUALS": "PERPHjGBqRHArX4DySjwM6UJHiR3sWAatqfdBS2qQJu"
+      },
+      "governance": {
+        "JUP_TOKEN": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+        "VOTE_PROGRAM": "voTpe3tHQ7AjQHMapgSue2HJFAh2cGsdokqN3XqmVSj"
+      },
+      "docs": "https://station.jup.ag/docs"
+    },
+    "marinade": {
+      "name": "Marinade Finance",
+      "description": "Liquid staking protocol",
+      "website": "https://marinade.finance",
+      "programs": {
+        "MARINADE_PROGRAM": "MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD",
+        "MARINADE_REFERRAL": "mRefx8ypXNxE59NhoBqwqb3vTvjgf8MYECp4kgJWiDY",
+        "DIRECTED_STAKE": "stkitrT1Uoy18Dk1fTrgPw8W6MVzoCfYoAFT4MLsmhq"
+      },
+      "tokens": {
+        "MSOL": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+        "MNDE": "MNDEFzGvMt87ueuHvVU9VcTqsAP5b3fTGPsHuuPA5ey"
+      },
+      "accounts": {
+        "STATE": "8szGkuLTAux9XMgZ2vtY39jVSowEcpBfFfD8hXSEqdGC",
+        "TREASURY": "B1aLzaNMeFVAyQ6f3XvUVacj9L74P5aPPMDL8LNMu9m2"
+      },
+      "docs": "https://docs.marinade.finance"
+    },
+    "marginfi": {
+      "name": "MarginFi",
+      "description": "Decentralized lending protocol",
+      "website": "https://marginfi.com",
+      "programs": {
+        "MARGINFI_PROGRAM": "MFv2hWf31Z9kbCa1snEPYctwafyhdvnV7FZnsebVacA",
+        "LIP": "LipXh3GBJz8wDjxZp6K7HNMgrLa2Q9dECqhrBexqPwT",
+        "LIQUIDITY_INCENTIVE": "LipsxuAkFkwa4RKNzn51wAsW7Dedzt1RNHMkTkDEZUW"
+      },
+      "groups": {
+        "MAIN_POOL": "4qp6Fx6tnZkY5Wropq9wUYgtFxXKwE6viZxFHg3rdAG8",
+        "_note": "Banks are created under groups for each asset"
+      },
+      "docs": "https://docs.marginfi.com"
+    },
+    "raydium": {
+      "name": "Raydium",
+      "description": "AMM and liquidity provider",
+      "website": "https://raydium.io",
+      "programs": {
+        "AMM_V4": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+        "CLMM": "CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK",
+        "CPMM": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C",
+        "STABLE_AMM": "5quBtoiQqxF9Jv6KYKctB59NT3gtJD2Y65kdnB1Uev3h",
+        "FARM_V3": "EhhTKczWMGQt46ynNeRX1WfeagwwJd7ufHvCDjRxjo5Q",
+        "FARM_V5": "9KEPoZmtHUrBbhWN1v1KWLMkkvwY6WLtAVUCPRtRjP4z",
+        "FARM_V6": "FarmqiPv5eAj3j1GMdMCMUGXqPUvmquZtMy86QH6rzhG"
+      },
+      "tokens": {
+        "RAY": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R"
+      },
+      "accounts": {
+        "AUTHORITY": "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",
+        "SERUM_PROGRAM": "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin"
+      },
+      "docs": "https://docs.raydium.io"
+    },
+    "orca": {
+      "name": "Orca",
+      "description": "User-friendly DEX with concentrated liquidity",
+      "website": "https://orca.so",
+      "programs": {
+        "WHIRLPOOLS": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
+        "WHIRLPOOLS_CONFIG": "2LecshUwdy9xi7meFgHtFJQNSKk4KdTrcpvaB56dP2NQ"
+      },
+      "tokens": {
+        "ORCA": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE"
+      },
+      "docs": "https://docs.orca.so"
+    },
+    "jito": {
+      "name": "Jito",
+      "description": "MEV and liquid staking infrastructure",
+      "website": "https://jito.network",
+      "programs": {
+        "STAKE_POOL": "Jito4APyf642JPZPx3hGc6WWJ8zPKtRbRs4P815Awbb",
+        "TIP_ROUTER": "Tip6jvHiGEiDA1YNQp8P3j1mEeGwAPg6XvgLBmP4ZnE",
+        "RESTAKING": "RestkWeAVL8fRGgzhfeoqFhsqKRchg6aa1XrcH96z4Q"
+      },
+      "tokens": {
+        "JITOSOL": "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn",
+        "JTO": "jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL"
+      },
+      "docs": "https://docs.jito.network"
+    },
+    "drift": {
+      "name": "Drift Protocol",
+      "description": "Decentralized perpetuals exchange",
+      "website": "https://drift.trade",
+      "programs": {
+        "DRIFT_PROGRAM": "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH",
+        "INSURANCE_FUND": "AwDEVDddDNwMZJxQMi8d4FRKnB6YNLfCG7L9FbrcE4Cq"
+      },
+      "tokens": {
+        "DRIFT": "DriFtupJYLTosbwoN8koMbEYSx54aFAVLddWsbksjwg7"
+      },
+      "docs": "https://docs.drift.trade"
+    },
+    "phoenix": {
+      "name": "Phoenix",
+      "description": "Fully on-chain order book DEX",
+      "website": "https://phoenix.trade",
+      "programs": {
+        "PHOENIX_V1": "PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY"
+      },
+      "docs": "https://docs.phoenix.trade"
+    },
+    "tensor": {
+      "name": "Tensor",
+      "description": "NFT marketplace and AMM",
+      "website": "https://tensor.trade",
+      "programs": {
+        "TENSOR_SWAP": "TSWAPaqyCSx2KABk68Shruf4rp7CxcNi8hAsbdwmHbN",
+        "TENSOR_BID": "TB1Dqt8JeKQh7RLDzfYDJsq8KS4fS2yt87avRjBW2A5",
+        "TENSOR_CRANK": "TCrankTQEk3rweAsmLQHD5mjbmPiUi7ZR4VLFyqbqBQ"
+      },
+      "tokens": {
+        "TNSR": "TNSRxcUxoT9xBG3de7PiJyTDYu7kskLqcpddxnEJAS6"
+      },
+      "docs": "https://docs.tensor.trade"
+    },
+    "sanctum": {
+      "name": "Sanctum",
+      "description": "LST infrastructure and Infinity pool",
+      "website": "https://sanctum.so",
+      "programs": {
+        "INFINITY": "5ocnV1qiCgaQR8Jb8xWnVbApfaRuOB6SUNxvNrn3rfNR",
+        "ROUTER": "stkroFNrPqGxr9T3qLTJz5VQoq4T9N2n3oABdmjLSeh"
+      },
+      "tokens": {
+        "INF": "5oVNBeEEQvYi1cX3ir8Dx5n1P7pdxydbGF2X4TxVusJm",
+        "CLOUD": "CLoUDKc4Ane7HeQcPpE3YHnznRxhMimJ4MyaUqyHFzAu"
+      },
+      "docs": "https://docs.sanctum.so"
+    }
+  },
+  "devnet": {
+    "_note": "Most protocols have devnet deployments with different addresses. Check protocol docs for devnet program IDs.",
+    "jupiter": {
+      "JUPITER_V6": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+    },
+    "marginfi": {
+      "MARGINFI_PROGRAM": "MFv2hWf31Z9kbCa1snEPYctwafyhdvnV7FZnsebVacA"
+    }
+  }
+}

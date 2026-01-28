@@ -1,0 +1,54 @@
+{
+  "description": "Common Solana program IDs",
+  "lastUpdated": "2026-01-27",
+  "mainnet": {
+    "system": {
+      "SYSTEM_PROGRAM": "11111111111111111111111111111111",
+      "BPF_LOADER": "BPFLoader2111111111111111111111111111111111",
+      "BPF_UPGRADEABLE_LOADER": "BPFLoaderUpgradeab1e11111111111111111111111",
+      "SYSVAR_CLOCK": "SysvarC1ock11111111111111111111111111111111",
+      "SYSVAR_RENT": "SysvarRent111111111111111111111111111111111",
+      "SYSVAR_INSTRUCTIONS": "Sysvar1nstructions1111111111111111111111111"
+    },
+    "token": {
+      "TOKEN_PROGRAM": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "TOKEN_2022_PROGRAM": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "ASSOCIATED_TOKEN_PROGRAM": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+    },
+    "metaplex": {
+      "TOKEN_METADATA": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
+      "CORE": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d",
+      "BUBBLEGUM": "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY",
+      "CANDY_MACHINE_V3": "CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR",
+      "AUCTION_HOUSE": "hausS13jsjafwWwGqZTUQRmWyvyxn9EQpqMwV1PBBmk"
+    },
+    "oracle": {
+      "PYTH": "FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH",
+      "SWITCHBOARD_V2": "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
+    },
+    "governance": {
+      "SPL_GOVERNANCE": "GovER5Lthms3bLBqWub97yVrMmEogzX7xNjdXpPPCVZw",
+      "REALMS": "GovER5Lthms3bLBqWub97yVrMmEogzX7xNjdXpPPCVZw"
+    },
+    "staking": {
+      "STAKE_PROGRAM": "Stake11111111111111111111111111111111111111",
+      "STAKE_CONFIG": "StakeConfig11111111111111111111111111111111"
+    },
+    "memo": {
+      "MEMO_V1": "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo",
+      "MEMO_V2": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+    },
+    "name_service": {
+      "NAME_SERVICE": "namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX"
+    },
+    "compute": {
+      "COMPUTE_BUDGET": "ComputeBudget111111111111111111111111111111"
+    }
+  },
+  "devnet": {
+    "_note": "Most program IDs are the same on devnet. Only listing differences.",
+    "oracle": {
+      "PYTH": "gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s"
+    }
+  }
+}
