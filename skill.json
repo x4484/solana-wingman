@@ -1,10 +1,12 @@
 {
   "name": "solana-wingman",
-  "version": "0.1.0",
-  "description": "Solana development tutor and builder. Teaches program development through Solana-native challenges, Anchor framework, and security best practices.",
-  "author": "Rani",
+  "version": "1.0.0",
+  "description": "Solana development tutor and builder. Teaches program development through Anchor framework, security best practices, and real protocol integrations.",
+  "author": "x4484",
   "license": "MIT",
-  "repository": "https://github.com/solana-wingman/solana-wingman",
+  "repository": "https://github.com/x4484/solana-wingman",
+  "homepage": "https://github.com/x4484/solana-wingman#readme",
+  
   "keywords": [
     "solana",
     "anchor",
@@ -13,8 +15,14 @@
     "web3",
     "smart-contracts",
     "defi",
-    "nft"
+    "nft",
+    "spl-token",
+    "metaplex",
+    "compressed-nft",
+    "token-2022",
+    "agent-skill"
   ],
+  
   "triggers": [
     "solana",
     "anchor",
@@ -24,8 +32,13 @@
     "nft solana",
     "pda",
     "compressed nft",
-    "solana development"
+    "solana development",
+    "jupiter",
+    "marinade",
+    "marginfi",
+    "raydium"
   ],
+  
   "capabilities": [
     "teach solana concepts",
     "scaffold anchor projects",
@@ -34,26 +47,81 @@
     "debug transactions",
     "explain pdas",
     "token operations",
-    "nft creation"
+    "nft creation",
+    "defi integrations",
+    "protocol integration"
   ],
+  
   "files": {
     "skill": "skills/solana-wingman/SKILL.md",
     "agents": "AGENTS.md",
-    "cursorrules": ".cursorrules"
+    "cursorrules": ".cursorrules",
+    "readme": "README.md"
   },
+  
   "knowledge": {
-    "challenges": "knowledge/challenges/",
-    "foundations": "knowledge/foundations/",
-    "gotchas": "knowledge/gotchas/",
-    "protocols": "knowledge/protocols/",
-    "standards": "knowledge/standards/"
+    "challenges": {
+      "path": "knowledge/challenges/",
+      "count": 10,
+      "description": "Hands-on learning challenges with full Anchor code"
+    },
+    "foundations": {
+      "path": "knowledge/foundations/",
+      "count": 8,
+      "description": "Core Solana concepts (accounts, PDAs, CPIs, etc.)"
+    },
+    "gotchas": {
+      "path": "knowledge/gotchas/",
+      "description": "Common pitfalls and security issues"
+    },
+    "protocols": {
+      "path": "knowledge/protocols/",
+      "count": 4,
+      "items": ["jupiter", "marinade", "marginfi", "raydium"]
+    },
+    "standards": {
+      "path": "knowledge/standards/",
+      "count": 4,
+      "items": ["spl-token", "token-2022", "metaplex-core", "token-metadata"]
+    }
   },
+  
   "tools": {
     "anchor": "tools/anchor/",
     "solana-cli": "tools/solana-cli/",
     "security": "tools/security/"
   },
+  
+  "data": {
+    "programs": "data/addresses/programs.json",
+    "tokens": "data/addresses/tokens.json",
+    "protocols": "data/addresses/protocols.json"
+  },
+  
   "scripts": {
-    "init": "skills/solana-wingman/scripts/init-project.sh"
+    "init": "skills/solana-wingman/scripts/init-project.sh",
+    "check-gotchas": "skills/solana-wingman/scripts/check-gotchas.sh",
+    "setup-cursor": "skills/solana-wingman/scripts/setup-cursor.sh"
+  },
+  
+  "prompts": {
+    "build": "prompts/build-mode.md",
+    "audit": "prompts/audit-mode.md",
+    "optimize": "prompts/optimize-mode.md",
+    "learn": "prompts/learn-mode.md"
+  },
+  
+  "ide": {
+    "claude": ".claude/skills/solana-wingman/",
+    "cursor": ".cursor/commands/",
+    "codex": ".codex/skills/solana-wingman/",
+    "agents": ".agents/skills/solana-wingman/",
+    "opencode": ".opencode/skills/solana-wingman/"
+  },
+  
+  "compatibility": {
+    "anchor": ">=0.29.0",
+    "solana-cli": ">=1.17.0",
+    "rust": ">=1.70.0"
   }
 }
