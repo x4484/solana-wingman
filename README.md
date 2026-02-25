@@ -7,9 +7,9 @@ AI agent skills for Solana development. Four skills covering program development
 | Skill | What it does |
 |-------|-------------|
 | [solana-wingman](skills/solana-wingman/) | Solana development tutor. Teaches Anchor programs through 10 hands-on challenges, covers the account model, PDAs, CPIs, and critical gotchas. |
-| [solana-defi](skills/solana-defi/) | Jupiter DeFi integrations. Token swaps (Ultra API), limit orders, DCA strategies, token info and security checks. |
-| [solana-blinks](skills/solana-blinks/) | Build Solana Actions (blinks) that unfurl into interactive transaction buttons on X, Discord, and the web. |
-| [solana-security](skills/solana-security/) | Audit Anchor programs for vulnerabilities. Missing signer checks, PDA collisions, arithmetic overflow, CPI safety, and pre-deploy checklists. |
+| [solana-defi](skills/solana-defi/) | Jupiter DeFi integrations. Token swaps (Ultra API), limit orders (Trigger API), DCA (Recurring API), token info and security checks. |
+| [solana-blinks](skills/solana-blinks/) | Build Solana Actions (blinks) with v2 spec support: action chaining, rich inputs, and interactive transaction buttons on X, Discord, and the web. |
+| [solana-security](skills/solana-security/) | Audit Anchor programs for 12 vulnerability categories including signer checks, PDA collisions, account revival, CPI reentrancy, and pre-deploy checklists. |
 
 ## Install
 
@@ -91,10 +91,12 @@ solana-wingman/
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # Solana CLI
-sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
 
-# Anchor
-cargo install --git https://github.com/coral-xyz/anchor anchor-cli
+# Anchor (via avm)
+cargo install --git https://github.com/coral-xyz/anchor avm --force
+avm install latest
+avm use latest
 ```
 
 ## License
