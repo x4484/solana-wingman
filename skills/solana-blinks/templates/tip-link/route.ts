@@ -94,10 +94,12 @@ export async function POST(req: Request) {
     };
     
     return Response.json(response, { headers: ACTIONS_CORS_HEADERS });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Tip action error:', error);
+    const message =
+      error instanceof Error ? error.message : 'Failed to create transaction';
     return Response.json(
-      { error: { message: error.message || 'Failed to create transaction' } },
+      { error: { message } },
       { status: 500, headers: ACTIONS_CORS_HEADERS }
     );
   }

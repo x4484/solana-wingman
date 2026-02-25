@@ -1,15 +1,15 @@
 #!/bin/bash
 # Initialize a new Solana project with Anchor
 
-set -e
+set -euo pipefail
 
 PROJECT_NAME=${1:-"my_solana_project"}
 
 echo "🚀 Creating Solana project: $PROJECT_NAME"
 
 # Check prerequisites
-command -v solana >/dev/null 2>&1 || { echo "❌ Solana CLI not installed. Run: sh -c \"\$(curl -sSfL https://release.solana.com/stable/install)\""; exit 1; }
-command -v anchor >/dev/null 2>&1 || { echo "❌ Anchor not installed. Run: cargo install --git https://github.com/coral-xyz/anchor anchor-cli"; exit 1; }
+command -v solana >/dev/null 2>&1 || { echo "❌ Solana CLI not installed. Run: sh -c \"\$(curl -sSfL https://release.solana.com/stable/install)\" (or https://release.anza.xyz/stable/install for the Agave client)"; exit 1; }
+command -v anchor >/dev/null 2>&1 || { echo "❌ Anchor not installed. Run: cargo install --git https://github.com/coral-xyz/anchor avm --force && avm install latest && avm use latest"; exit 1; }
 command -v rustc >/dev/null 2>&1 || { echo "❌ Rust not installed. Run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"; exit 1; }
 
 # Create project
@@ -24,7 +24,6 @@ cat >> programs/"$PROJECT_NAME"/Cargo.toml << 'EOF'
 
 # Common Solana dependencies
 [dependencies.anchor-spl]
-version = "0.30.0"
 features = ["token", "associated_token"]
 EOF
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test a Solana Action endpoint
 
-set -e
+set -euo pipefail
 
 ACTION_URL="${1:-http://localhost:3000/api/actions/tip}"
 
@@ -55,7 +55,7 @@ fi
 echo ""
 
 # Test POST (if wallet provided)
-if [ -n "$2" ]; then
+if [ -n "${2:-}" ]; then
   WALLET="$2"
   echo "📤 POST Request (wallet: ${WALLET:0:8}...):"
   echo "---"

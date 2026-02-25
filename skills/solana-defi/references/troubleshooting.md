@@ -36,7 +36,7 @@
 
 **Solutions:**
 1. Ultra API handles this automatically - just retry
-2. If using Metis API, get a fresh blockhash:
+2. If using the Swap API, get a fresh blockhash:
    ```typescript
    const { blockhash } = await connection.getLatestBlockhash();
    ```
@@ -78,11 +78,12 @@
 
 ## Rate Limits
 
-Jupiter APIs have dynamic rate limits based on usage:
+Jupiter APIs use a tiered rate limit system based on your API key plan. All requests require an `x-api-key` header (get a free key at [portal.jup.ag](https://portal.jup.ag)).
 
-- **Basic usage:** ~60 requests/minute
-- **Heavy usage:** May be throttled
-- **Best practice:** Cache quotes for 10-30 seconds
+- **Free tier:** Limited requests/minute (suitable for development and light usage)
+- **Paid tiers:** Higher rate limits for production workloads
+- **No API key:** Requests will be rejected
+- **Best practice:** Cache quotes for 10-30 seconds, use a paid tier for production bots
 
 ```typescript
 // Simple rate limiter

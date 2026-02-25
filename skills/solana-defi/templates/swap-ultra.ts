@@ -8,6 +8,7 @@
 import { VersionedTransaction, Keypair } from '@solana/web3.js';
 
 const JUPITER_ULTRA = 'https://api.jup.ag/ultra/v1';
+const API_KEY = process.env.JUPITER_API_KEY!;
 
 // Common token mints
 const TOKENS = {
@@ -60,7 +61,9 @@ export async function swapWithUltra(
   }
   
   // 2. Get quote and unsigned transaction
-  const orderRes = await fetch(orderUrl.toString());
+  const orderRes = await fetch(orderUrl.toString(), {
+    headers: { 'x-api-key': API_KEY },
+  });
   const order: OrderResponse = await orderRes.json();
   
   if (order.error || !order.transaction) {
@@ -78,7 +81,10 @@ export async function swapWithUltra(
   // 4. Execute via Jupiter (handles MEV protection + transaction landing)
   const executeRes = await fetch(`${JUPITER_ULTRA}/execute`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
     body: JSON.stringify({
       signedTransaction: Buffer.from(transaction.serialize()).toString('base64'),
       requestId: order.requestId,
@@ -93,7 +99,9 @@ export async function swapWithUltra(
  * Get token holdings for a wallet
  */
 export async function getHoldings(wallet: string) {
-  const res = await fetch(`${JUPITER_ULTRA}/holdings?wallet=${wallet}`);
+  const res = await fetch(`${JUPITER_ULTRA}/holdings/${wallet}`, {
+    headers: { 'x-api-key': API_KEY },
+  });
   return res.json();
 }
 
@@ -101,7 +109,9 @@ export async function getHoldings(wallet: string) {
  * Search for a token by name, symbol, or mint
  */
 export async function searchToken(query: string) {
-  const res = await fetch(`${JUPITER_ULTRA}/search?query=${encodeURIComponent(query)}`);
+  const res = await fetch(`${JUPITER_ULTRA}/search?query=${encodeURIComponent(query)}`, {
+    headers: { 'x-api-key': API_KEY },
+  });
   return res.json();
 }
 
@@ -109,7 +119,9 @@ export async function searchToken(query: string) {
  * Get token security information
  */
 export async function getTokenSecurity(mint: string) {
-  const res = await fetch(`${JUPITER_ULTRA}/shield?mint=${mint}`);
+  const res = await fetch(`${JUPITER_ULTRA}/shield?mints=${mint}`, {
+    headers: { 'x-api-key': API_KEY },
+  });
   return res.json();
 }
 
@@ -151,6 +163,6 @@ async function main() {
 }
 
 // Run if executed directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }

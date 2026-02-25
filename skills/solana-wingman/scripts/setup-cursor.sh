@@ -3,7 +3,7 @@
 #
 # Usage: ./setup-cursor.sh [project-directory]
 
-set -e
+set -euo pipefail
 
 PROJECT_DIR="${1:-.}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

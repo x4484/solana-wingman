@@ -1,3 +1,15 @@
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !! WARNING: THIS TEMPLATE WILL NOT WORK AS-IS                 !!
+// !!                                                             !!
+// !! The createTransferInstruction below requires the treasury   !!
+// !! wallet to sign, but in a blink only the user's wallet signs.!!
+// !! The transaction will fail at submission.                     !!
+// !!                                                             !!
+// !! To make this work, use one of:                              !!
+// !!  - Jupiter swap (user swaps SOL for token via DEX pool)     !!
+// !!  - PDA-based program (tokens held in PDA, program signs)    !!
+// !!  - Co-signing backend (server holds key, partially signs)   !!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 import {
   ActionGetResponse,
   ActionPostResponse,
@@ -142,10 +154,12 @@ export async function POST(req: Request) {
     };
     
     return Response.json(response, { headers: ACTIONS_CORS_HEADERS });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Token purchase error:', error);
+    const message =
+      error instanceof Error ? error.message : 'Failed to create transaction';
     return Response.json(
-      { error: { message: error.message || 'Failed to create transaction' } },
+      { error: { message } },
       { status: 500, headers: ACTIONS_CORS_HEADERS }
     );
   }

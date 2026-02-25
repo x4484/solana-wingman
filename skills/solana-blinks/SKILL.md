@@ -1,6 +1,7 @@
 ---
 name: solana-blinks-builder
-description: Build Solana Actions (blinks) that unfurl into interactive transactions on X, Discord, and the web. Create tip links, token purchase buttons, and shareable transaction URLs. For intermediate Solana devs who know web3.js but are new to the Actions spec.
+description: Build Solana Actions v2 (blinks) with action chaining, rich inputs, and multi-step workflows. Create tip links, token purchases, and shareable transaction URLs that unfurl on X, Discord, and the web.
+triggers: ["solana action", "solana blink", "blinks", "actions.json", "solana-action:", "ActionGetResponse", "ActionPostResponse", "ACTIONS_CORS_HEADERS", "LinkedAction", "action chaining", "solana shareable link"]
 metadata: {"clawdbot":{"emoji":"🔗","homepage":"https://github.com/x4484/solana-blinks-builder"}}
 ---
 
@@ -71,24 +72,159 @@ interface ActionGetResponse {
   label: string;        // Default button text
   disabled?: boolean;   // Gray out if action unavailable
   links?: {
-    actions: Array<{
-      label: string;    // Button text
-      href: string;     // URL with params
-    }>;
+    actions: LinkedAction[];  // Multiple button options
   };
+}
+
+interface LinkedAction {
+  label: string;        // Button text
+  href: string;         // Action URL (can include query params)
+  type?: 'transaction' | 'message' | 'post' | 'external-link';
+  parameters?: ActionParameter[];  // User input fields
 }
 ```
 
 ### POST Request
-Client sends user's wallet, you return a transaction:
+Client sends user's wallet, you return a response:
 ```typescript
 // Request body
-{ "account": "UserWalletPublicKey..." }
+interface ActionPostRequest {
+  account: string;      // User's wallet public key (base58)
+  type?: string;        // Request type (e.g. "transaction", "message")
+  data?: unknown;       // Additional data for the request
+}
 
-// Response
-interface ActionPostResponse {
+// Response - union type depending on what the action does
+type ActionPostResponse =
+  | TransactionResponse
+  | PostResponse
+  | ExternalLinkResponse
+  | SignMessageResponse;
+
+interface TransactionResponse {
+  type?: 'transaction';
   transaction: string;  // Base64 serialized transaction
   message?: string;     // Optional success message
+  links?: { next: NextAction };  // Action chaining
+}
+
+interface PostResponse {
+  type: 'post';
+  message?: string;     // Message to show user
+  links?: { next: NextAction };
+}
+
+interface ExternalLinkResponse {
+  type: 'external-link';
+  externalLink: string; // URL to open in browser
+  links?: { next: NextAction };
+}
+
+interface SignMessageResponse {
+  type: 'message';
+  data: string;         // Message for wallet to sign (not a tx)
+  state?: string;       // State token to pass back
+  links?: { next: NextAction };
+}
+```
+
+Most blinks use `TransactionResponse` (the default when `type` is omitted).
+
+### Action Chaining (Multi-Step Workflows)
+
+Actions can chain into follow-up steps using `links.next` in the POST response. This is a flagship v2 feature for multi-step workflows (e.g., approve then swap, fill form then confirm).
+
+```typescript
+// Two forms of next action:
+type NextAction = PostNextActionLink | InlineNextActionLink;
+
+// Server provides a URL to GET the next action from
+interface PostNextActionLink {
+  type: 'post';
+  href: string;  // URL to POST to for next action
+}
+
+// Server provides the next action inline (no extra request)
+interface InlineNextActionLink {
+  type: 'inline';
+  action: ActionGetResponse;  // Full action metadata inline
+}
+
+// Terminal state - signals the workflow is complete
+interface CompletedAction {
+  type: 'completed';
+  icon: string;
+  title: string;
+  description: string;
+  label: string;        // Final button text (disabled)
+}
+```
+
+Example: a two-step swap that first approves, then swaps:
+```typescript
+// POST /api/actions/swap (step 1: approve)
+return Response.json({
+  transaction: approvalTxBase64,
+  message: 'Approve token spending',
+  links: {
+    next: {
+      type: 'post',
+      href: '/api/actions/swap/execute',
+    },
+  },
+});
+```
+
+### Rich Input Types
+
+Actions support typed input fields beyond plain text. Use `ActionParameterType` to
+specify the input kind, and `options` for select/radio/checkbox:
+
+```typescript
+type ActionParameterType =
+  | 'text' | 'email' | 'url' | 'number'
+  | 'date' | 'datetime-local' | 'textarea'
+  | 'select' | 'radio' | 'checkbox';
+
+interface TypedActionParameter {
+  name: string;
+  label: string;
+  required?: boolean;
+  type?: ActionParameterType;  // Defaults to 'text'
+  // For select, radio, checkbox:
+  options?: ActionParameterOption[];
+}
+
+interface ActionParameterOption {
+  label: string;  // Display text
+  value: string;  // Value sent in query param
+  selected?: boolean;  // Pre-selected default
+}
+```
+
+Example with a dropdown:
+```typescript
+{
+  label: 'Donate',
+  href: '/api/actions/donate?token={token}&amount={amount}',
+  parameters: [
+    {
+      name: 'token',
+      label: 'Token',
+      type: 'select',
+      required: true,
+      options: [
+        { label: 'SOL', value: 'SOL', selected: true },
+        { label: 'USDC', value: 'USDC' },
+      ],
+    },
+    {
+      name: 'amount',
+      label: 'Amount',
+      type: 'number',
+      required: true,
+    },
+  ],
 }
 ```
 
@@ -288,7 +424,10 @@ export async function POST(req: Request) {
 }
 ```
 
-**⚠️ Important:** The token purchase example requires the treasury to co-sign. For production, use a PDA-controlled treasury or a separate signing service.
+**WARNING: This template WILL NOT WORK as-is.** The `createTransferInstruction` requires the treasury wallet to sign the transaction, but in a blink only the user's wallet signs. The transaction will fail at submission. To make token purchases work, either:
+- Use a **Jupiter swap** so the user swaps SOL for your token through a DEX pool (no treasury signing needed)
+- Use a **PDA-based program** where tokens are held in a PDA your on-chain program controls, and the program signs via CPI
+- Use a **co-signing backend** that holds the treasury key and partially signs before returning the transaction
 
 ## Configuration: actions.json
 
@@ -393,6 +532,10 @@ transaction.feePayer = new PublicKey(body.account);
 - Must be at domain root: `https://yourdomain.com/actions.json`
 - In Next.js: `public/actions.json`
 
+## Note on @solana/web3.js vs @solana/kit
+
+The templates in this skill use `@solana/web3.js` v1, which is on **maintenance mode** (security fixes only). The successor is `@solana/kit` (formerly `@solana/web3.js` v2) -- a full rewrite with tree-shaking, smaller bundles, and modern APIs. The v1 code here still works and most tutorials reference it, but for new projects consider using `@solana/kit`.
+
 ## References
 
 - [Solana Actions Docs](https://solana.com/docs/advanced/actions)
@@ -401,3 +544,4 @@ transaction.feePayer = new PublicKey(body.account);
 - [Blinks Inspector](https://www.blinks.xyz/inspector)
 - [Dialect Registry](https://dial.to/register)
 - [Awesome Blinks](https://github.com/solana-developers/awesome-blinks)
+- [@solana/kit (web3.js v2)](https://www.npmjs.com/package/@solana/kit)

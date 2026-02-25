@@ -1,7 +1,7 @@
 #!/bin/bash
 # Scaffold a new Solana Action project
 
-set -e
+set -euo pipefail
 
 PROJECT_NAME="${1:-my-blink}"
 
@@ -106,20 +106,18 @@ export async function POST(req: Request) {
     };
     
     return Response.json(response, { headers: ACTIONS_CORS_HEADERS });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : 'Unknown error';
     return Response.json(
-      { error: { message: error.message || 'Unknown error' } },
+      { error: { message } },
       { status: 500, headers: ACTIONS_CORS_HEADERS }
     );
   }
 }
 EOF
 
-# Create placeholder icon
-echo "🖼️ Creating placeholder icon..."
-cat > public/icon.png << 'EOF'
-EOF
-# Note: This creates an empty file - replace with actual icon
+# Add your own icon at public/icon.png (256x256 PNG recommended)
 
 # Create .env.local
 echo "🔐 Creating .env.local..."

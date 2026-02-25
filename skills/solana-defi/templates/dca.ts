@@ -7,8 +7,9 @@
 
 import { Connection, VersionedTransaction, Keypair, PublicKey } from '@solana/web3.js';
 
-const JUPITER_DCA = 'https://api.jup.ag/dca/v1';
+const JUPITER_RECURRING = 'https://api.jup.ag/recurring/v1';
 const RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+const API_KEY = process.env.JUPITER_API_KEY!;
 
 const TOKENS = {
   SOL: 'So11111111111111111111111111111111111111112',
@@ -65,9 +66,12 @@ export async function createDCA(
   const connection = new Connection(RPC_URL);
   
   // 1. Request DCA creation transaction
-  const res = await fetch(`${JUPITER_DCA}/create`, {
+  const res = await fetch(`${JUPITER_RECURRING}/createOrder`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
     body: JSON.stringify({
       user: wallet.publicKey.toBase58(),
       inputMint,
@@ -87,18 +91,18 @@ export async function createDCA(
   }
   
   // 2. Sign the transaction
-  const txBuffer = Buffer.from(data.tx, 'base64');
+  const txBuffer = Buffer.from(data.transaction, 'base64');
   const transaction = VersionedTransaction.deserialize(txBuffer);
   transaction.sign([wallet]);
-  
+
   // 3. Send to network
   const signature = await connection.sendRawTransaction(transaction.serialize(), {
     skipPreflight: false,
     maxRetries: 3,
   });
-  
+
   await connection.confirmTransaction(signature, 'confirmed');
-  
+
   return signature;
 }
 
@@ -106,7 +110,10 @@ export async function createDCA(
  * Get all DCA positions for a wallet
  */
 export async function getDCAPositions(wallet: string): Promise<DCAPosition[]> {
-  const res = await fetch(`${JUPITER_DCA}/user/${wallet}`);
+  const res = await fetch(
+    `${JUPITER_RECURRING}/getRecurringOrders?user=${wallet}&orderStatus=active`,
+    { headers: { 'x-api-key': API_KEY } }
+  );
   const data = await res.json();
   return data.positions || [];
 }
@@ -121,22 +128,25 @@ export async function closeDCA(
   
   const connection = new Connection(RPC_URL);
   
-  const res = await fetch(`${JUPITER_DCA}/close`, {
+  const res = await fetch(`${JUPITER_RECURRING}/cancelOrder`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
     body: JSON.stringify({
       user: wallet.publicKey.toBase58(),
       dca: dcaAddress,
     }),
   });
-  
+
   const data = await res.json();
-  
+
   if (data.error) {
     throw new Error(`Failed to close DCA: ${data.error}`);
   }
-  
-  const txBuffer = Buffer.from(data.tx, 'base64');
+
+  const txBuffer = Buffer.from(data.transaction, 'base64');
   const transaction = VersionedTransaction.deserialize(txBuffer);
   transaction.sign([wallet]);
   
@@ -201,6 +211,6 @@ async function main() {
   console.log(`Will buy SOL daily for ${params.durationDays} days`);
 }
 
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }

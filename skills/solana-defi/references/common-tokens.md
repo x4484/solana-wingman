@@ -15,14 +15,13 @@
 | Jupiter | JUP | `JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN` | 6 |
 | Raydium | RAY | `4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R` | 6 |
 | Orca | ORCA | `orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE` | 6 |
-| Serum | SRM | `SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt` | 6 |
 
 ## Liquid Staking Tokens
 
 | Token | Symbol | Mint Address | Decimals |
 |-------|--------|--------------|----------|
 | Marinade SOL | mSOL | `mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So` | 9 |
-| Lido SOL | stSOL | `7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj` | 9 |
+| Lido SOL (DEPRECATED) | stSOL | `7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj` | 9 |
 | Jito SOL | JitoSOL | `J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn` | 9 |
 | bSOL | bSOL | `bSo13r4TkiE4KumL71LsHTPpL2euBYLFx6h9HP3piy1` | 9 |
 
@@ -82,11 +81,13 @@ export const DECIMALS: Record<string, number> = {
 };
 ```
 
+**Note:** Token listings change frequently. Always verify mint addresses using the Jupiter search API before integrating a token. Tokens may be delisted, migrated, or deprecated without notice.
+
 ## Finding Token Mints
 
 ### Jupiter Search API
 ```bash
-curl "https://api.jup.ag/ultra/v1/search?query=bonk" | jq
+curl -H "x-api-key: YOUR_API_KEY" "https://api.jup.ag/ultra/v1/search?query=bonk" | jq
 ```
 
 ### Solscan

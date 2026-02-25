@@ -7,8 +7,9 @@
 
 import { Connection, VersionedTransaction, Keypair } from '@solana/web3.js';
 
-const JUPITER_LIMIT = 'https://api.jup.ag/limit/v2';
+const JUPITER_TRIGGER = 'https://api.jup.ag/trigger/v1';
 const RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+const API_KEY = process.env.JUPITER_API_KEY!;
 
 const TOKENS = {
   SOL: 'So11111111111111111111111111111111111111112',
@@ -49,9 +50,12 @@ export async function createLimitOrder(
   const connection = new Connection(RPC_URL);
   
   // 1. Request order creation transaction
-  const res = await fetch(`${JUPITER_LIMIT}/createOrder`, {
+  const res = await fetch(`${JUPITER_TRIGGER}/createOrder`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
     body: JSON.stringify({
       maker: wallet.publicKey.toBase58(),
       payer: wallet.publicKey.toBase58(),
@@ -70,10 +74,10 @@ export async function createLimitOrder(
   }
   
   // 2. Sign the transaction
-  const txBuffer = Buffer.from(data.tx, 'base64');
+  const txBuffer = Buffer.from(data.transaction, 'base64');
   const transaction = VersionedTransaction.deserialize(txBuffer);
   transaction.sign([wallet]);
-  
+
   // 3. Send to network
   const signature = await connection.sendRawTransaction(transaction.serialize(), {
     skipPreflight: false,
@@ -90,7 +94,10 @@ export async function createLimitOrder(
  * Get all open orders for a wallet
  */
 export async function getOpenOrders(wallet: string): Promise<LimitOrder[]> {
-  const res = await fetch(`${JUPITER_LIMIT}/openOrders?wallet=${wallet}`);
+  const res = await fetch(
+    `${JUPITER_TRIGGER}/getTriggerOrders?user=${wallet}&orderStatus=active`,
+    { headers: { 'x-api-key': API_KEY } }
+  );
   const data = await res.json();
   return data.orders || [];
 }
@@ -99,7 +106,10 @@ export async function getOpenOrders(wallet: string): Promise<LimitOrder[]> {
  * Get order history for a wallet
  */
 export async function getOrderHistory(wallet: string): Promise<LimitOrder[]> {
-  const res = await fetch(`${JUPITER_LIMIT}/orderHistory?wallet=${wallet}`);
+  const res = await fetch(
+    `${JUPITER_TRIGGER}/getTriggerOrders?user=${wallet}&orderStatus=history`,
+    { headers: { 'x-api-key': API_KEY } }
+  );
   const data = await res.json();
   return data.orders || [];
 }
@@ -115,9 +125,12 @@ export async function cancelOrders(
   const connection = new Connection(RPC_URL);
   
   // 1. Request cancel transactions
-  const res = await fetch(`${JUPITER_LIMIT}/cancelOrders`, {
+  const res = await fetch(`${JUPITER_TRIGGER}/cancelOrder`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
     body: JSON.stringify({
       maker: wallet.publicKey.toBase58(),
       orders: orderIds,
@@ -196,6 +209,6 @@ async function main() {
   console.log('Order price: $', price.toFixed(2), 'per SOL');
 }
 
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch(console.error);
 }

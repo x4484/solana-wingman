@@ -131,9 +131,11 @@ minimum_balance = account_size_bytes × 0.00000348 SOL × 2 years
 **Examples:**
 - 0 bytes (just exists): ~0.00089 SOL
 - 165 bytes (token account): ~0.00203 SOL
-- 1000 bytes: ~0.00756 SOL
+- 1000 bytes: ~0.0157 SOL
 
 **Best practice:** Always make accounts rent-exempt (pay 2 years upfront).
+
+> **Note:** All accounts are now required to be rent-exempt on Solana. The `rent_epoch` field on accounts is effectively deprecated.
 
 ```rust
 #[account(
@@ -194,7 +196,7 @@ Solana uses **compute units (CU)**, not gas.
 | Default | Estimated | 200,000 per ix |
 | Max | Block limit | 1,400,000 per tx |
 | Price | Fluctuates | Priority fee optional |
-| Refund | Unused refunded | No refund |
+| Refund | Unused refunded | Unused CUs not charged |
 
 **Requesting more CU:**
 ```typescript
@@ -213,6 +215,8 @@ const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
     microLamports: 1_000  // Price per CU in micro-lamports
 });
 ```
+
+> **Note:** Requesting fewer compute units reduces your priority fee cost, since priority fee = CU price x CU requested. Always set compute unit limits as tight as possible.
 
 **Optimization tips:**
 - Minimize account reads/writes
@@ -255,6 +259,8 @@ Legacy transactions have limits. Use v0 transactions for complex DeFi.
 |------|--------------|----------|
 | Legacy | ~35 | Simple transfers |
 | v0 + ALT | 256 | Complex DeFi, swaps |
+
+> **Note:** All transactions (legacy and v0) are limited to **1232 bytes** total serialized size. This hard limit constrains how many accounts and instructions you can fit in a single transaction.
 
 **Address Lookup Tables (ALTs):**
 ```typescript
@@ -324,7 +330,7 @@ use anchor_lang::solana_program::ed25519_program;
 | Token accounts | Separate from wallet, need ATAs |
 | Rent | Pay 2 years upfront = rent-exempt |
 | CPIs | Max 4 depth, pass all accounts |
-| Compute | 200k default, 1.4M max, no refund |
+| Compute | 200k default, 1.4M max, unused CUs not charged |
 | Token-2022 | Different program ID than SPL Token |
 | Transactions | Use v0 + ALTs for complex operations |
 | Time | Clock sysvar, not block.timestamp |

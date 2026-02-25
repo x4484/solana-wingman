@@ -1,12 +1,40 @@
 ---
-name: jupiter-defi
+name: solana-defi
 description: Build Solana DeFi apps with Jupiter aggregator, limit orders, DCA, and liquidity provision. Unified interface for swaps, trading strategies, and LP management.
 metadata: {"clawdbot":{"emoji":"🪐","category":"solana"}}
+triggers:
+  - jupiter swap
+  - solana defi
+  - token swap solana
+  - limit order jupiter
+  - dca solana
+  - dollar cost average
+  - jupiter ultra
 ---
 
 # Jupiter DeFi Integrator
 
 Build DeFi applications on Solana. Covers token swaps, limit orders, DCA strategies, and liquidity provision through a unified interface.
+
+## API Key Requirement
+
+All Jupiter API calls now require an `x-api-key` header. Get a free key from [portal.jup.ag](https://portal.jup.ag).
+
+```typescript
+const JUPITER_API_KEY = process.env.JUPITER_API_KEY;
+
+const headers: Record<string, string> = {
+  'x-api-key': JUPITER_API_KEY,
+};
+
+// For POST requests, also include Content-Type:
+const postHeaders: Record<string, string> = {
+  'x-api-key': JUPITER_API_KEY,
+  'Content-Type': 'application/json',
+};
+```
+
+Include the `x-api-key` header in every `fetch` call to Jupiter endpoints.
 
 ## Quick Start
 
@@ -14,35 +42,35 @@ Build DeFi applications on Solana. Covers token swaps, limit orders, DCA strateg
 
 ```bash
 # Swap 0.1 SOL to USDC using Jupiter Ultra API
-curl -s "https://api.jup.ag/ultra/v1/order?inputMint=So11111111111111111111111111111111111111112&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&amount=100000000&taker=YOUR_WALLET" | jq
+curl -s -H "x-api-key: YOUR_API_KEY" "https://api.jup.ag/ultra/v1/order?inputMint=So11111111111111111111111111111111111111112&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&amount=100000000&taker=YOUR_WALLET" | jq
 ```
 
 ### Check Token Price
 
 ```bash
-curl -s "https://api.jup.ag/price/v2?ids=So11111111111111111111111111111111111111112" | jq
+curl -s -H "x-api-key: YOUR_API_KEY" "https://api.jup.ag/price/v3?ids=So11111111111111111111111111111111111111112" | jq
 ```
 
 ### Get Wallet Holdings
 
 ```bash
-curl -s "https://api.jup.ag/ultra/v1/holdings?wallet=YOUR_WALLET" | jq
+curl -s -H "x-api-key: YOUR_API_KEY" "https://api.jup.ag/ultra/v1/holdings/YOUR_WALLET" | jq
 ```
 
-## Architecture: Ultra vs Metis
+## Architecture: Ultra vs Swap API
 
 Jupiter offers two APIs. **Use Ultra by default.**
 
-| Feature | Ultra API | Metis API |
-|---------|-----------|-----------|
-| RPC Required | ❌ No | ✅ Yes |
-| MEV Protection | ✅ Built-in | ❌ Build yourself |
-| Gasless Support | ✅ Automatic | ❌ Build yourself |
-| CPI Support | ❌ No | ✅ Yes |
-| Custom Instructions | ❌ No | ✅ Yes |
+| Feature | Ultra API | Swap API |
+|---------|-----------|----------|
+| RPC Required | No | Yes |
+| MEV Protection | Built-in | Build yourself |
+| Gasless Support | Automatic | Build yourself |
+| CPI Support | No | Yes |
+| Custom Instructions | No | Yes |
 | Integration Time | Hours | Days/Weeks |
 
-**Choose Metis only when you need:**
+**Choose Swap API only when you need:**
 - CPI (calling Jupiter from your own Solana program)
 - Custom instructions in the transaction
 - Full control over execution infrastructure
@@ -54,10 +82,10 @@ Jupiter offers two APIs. **Use Ultra by default.**
 **Two-step flow:** Get order → Sign → Execute
 
 ```typescript
-import { Connection, VersionedTransaction, Keypair } from '@solana/web3.js';
-import bs58 from 'bs58';
+import { VersionedTransaction, Keypair } from '@solana/web3.js';
 
 const JUPITER_ULTRA = 'https://api.jup.ag/ultra/v1';
+const API_KEY = process.env.JUPITER_API_KEY!;
 
 async function swap(
   inputMint: string,
@@ -65,41 +93,47 @@ async function swap(
   amount: string,
   wallet: Keypair
 ): Promise<{ signature: string; inputAmount: string; outputAmount: string }> {
-  
+
   // 1. Get quote and unsigned transaction
   const orderUrl = new URL(`${JUPITER_ULTRA}/order`);
   orderUrl.searchParams.set('inputMint', inputMint);
   orderUrl.searchParams.set('outputMint', outputMint);
   orderUrl.searchParams.set('amount', amount);
   orderUrl.searchParams.set('taker', wallet.publicKey.toBase58());
-  
-  const orderRes = await fetch(orderUrl);
+
+  const orderRes = await fetch(orderUrl, {
+    headers: { 'x-api-key': API_KEY },
+  });
   const order = await orderRes.json();
-  
+
   if (order.error) {
     throw new Error(`Order failed: ${order.error}`);
   }
-  
+
   // 2. Sign the transaction
   const txBuffer = Buffer.from(order.transaction, 'base64');
   const transaction = VersionedTransaction.deserialize(txBuffer);
   transaction.sign([wallet]);
-  
+
   // 3. Execute via Jupiter (handles MEV protection + landing)
   const executeRes = await fetch(`${JUPITER_ULTRA}/execute`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
     body: JSON.stringify({
       signedTransaction: Buffer.from(transaction.serialize()).toString('base64'),
+      requestId: order.requestId,
     }),
   });
-  
+
   const result = await executeRes.json();
-  
+
   if (result.status !== 'Success') {
     throw new Error(`Execution failed: ${result.error || 'Unknown error'}`);
   }
-  
+
   return {
     signature: result.signature,
     inputAmount: result.inputAmount,
@@ -120,7 +154,8 @@ console.log(`Swapped! TX: ${result.signature}`);
 Create orders that execute when price hits your target.
 
 ```typescript
-const JUPITER_LIMIT = 'https://api.jup.ag/limit/v2';
+const JUPITER_TRIGGER = 'https://api.jup.ag/trigger/v1';
+const API_KEY = process.env.JUPITER_API_KEY!;
 
 // Create a limit order: Sell 1 SOL when price hits $200
 async function createLimitOrder(
@@ -131,9 +166,12 @@ async function createLimitOrder(
   wallet: Keypair,
   expiredAt?: number     // Unix timestamp, null = never expires
 ) {
-  const res = await fetch(`${JUPITER_LIMIT}/createOrder`, {
+  const res = await fetch(`${JUPITER_TRIGGER}/createOrder`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
     body: JSON.stringify({
       maker: wallet.publicKey.toBase58(),
       payer: wallet.publicKey.toBase58(),
@@ -144,38 +182,44 @@ async function createLimitOrder(
       expiredAt: expiredAt || null,
     }),
   });
-  
-  const { tx } = await res.json();
-  
+
+  const { transaction } = await res.json();
+
   // Sign and send
-  const transaction = VersionedTransaction.deserialize(Buffer.from(tx, 'base64'));
-  transaction.sign([wallet]);
-  
+  const tx = VersionedTransaction.deserialize(Buffer.from(transaction, 'base64'));
+  tx.sign([wallet]);
+
   // Send to network (need RPC for limit orders)
   const connection = new Connection('https://api.mainnet-beta.solana.com');
-  const sig = await connection.sendRawTransaction(transaction.serialize());
+  const sig = await connection.sendRawTransaction(tx.serialize());
   await connection.confirmTransaction(sig);
-  
+
   return sig;
 }
 
-// Query open orders
+// Query active orders
 async function getOpenOrders(wallet: string) {
-  const res = await fetch(`${JUPITER_LIMIT}/openOrders?wallet=${wallet}`);
+  const res = await fetch(
+    `${JUPITER_TRIGGER}/getTriggerOrders?user=${wallet}&orderStatus=active`,
+    { headers: { 'x-api-key': API_KEY } }
+  );
   return res.json();
 }
 
-// Cancel orders
-async function cancelOrders(orderIds: string[], wallet: Keypair) {
-  const res = await fetch(`${JUPITER_LIMIT}/cancelOrders`, {
+// Cancel an order
+async function cancelOrder(orderId: string, wallet: Keypair) {
+  const res = await fetch(`${JUPITER_TRIGGER}/cancelOrder`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
     body: JSON.stringify({
       maker: wallet.publicKey.toBase58(),
-      orders: orderIds,
+      orders: [orderId],
     }),
   });
-  
+
   const { txs } = await res.json();
   // Sign and send each cancel transaction...
 }
@@ -186,7 +230,8 @@ async function cancelOrders(orderIds: string[], wallet: Keypair) {
 Automatically buy/sell tokens on a schedule.
 
 ```typescript
-const JUPITER_DCA = 'https://api.jup.ag/dca/v1';
+const JUPITER_RECURRING = 'https://api.jup.ag/recurring/v1';
+const API_KEY = process.env.JUPITER_API_KEY!;
 
 // Create DCA: Buy SOL with 100 USDC over 10 days
 async function createDCA(
@@ -197,9 +242,12 @@ async function createDCA(
   cycleFrequency: number, // Seconds between purchases
   wallet: Keypair
 ) {
-  const res = await fetch(`${JUPITER_DCA}/create`, {
+  const res = await fetch(`${JUPITER_RECURRING}/createOrder`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
     body: JSON.stringify({
       user: wallet.publicKey.toBase58(),
       inputMint,
@@ -211,8 +259,8 @@ async function createDCA(
       maxPrice: null,
     }),
   });
-  
-  const { tx } = await res.json();
+
+  const { transaction } = await res.json();
   // Sign and send...
 }
 
@@ -230,30 +278,44 @@ await createDCA(
 ### 4. Token Information
 
 ```typescript
+const API_KEY = process.env.JUPITER_API_KEY!;
+
 // Search for tokens
 async function searchToken(query: string) {
-  const res = await fetch(`https://api.jup.ag/ultra/v1/search?query=${query}`);
+  const res = await fetch(
+    `https://api.jup.ag/ultra/v1/search?query=${query}`,
+    { headers: { 'x-api-key': API_KEY } }
+  );
   return res.json();
 }
 
 // Get token price
 async function getPrice(mint: string) {
-  const res = await fetch(`https://api.jup.ag/price/v2?ids=${mint}`);
+  const res = await fetch(
+    `https://api.jup.ag/price/v3?ids=${mint}`,
+    { headers: { 'x-api-key': API_KEY } }
+  );
   const data = await res.json();
   return data.data[mint]?.price;
 }
 
 // Get wallet holdings
 async function getHoldings(wallet: string) {
-  const res = await fetch(`https://api.jup.ag/ultra/v1/holdings?wallet=${wallet}`);
+  const res = await fetch(
+    `https://api.jup.ag/ultra/v1/holdings/${wallet}`,
+    { headers: { 'x-api-key': API_KEY } }
+  );
   return res.json();
 }
 
 // Token security check (Jupiter Shield)
 async function checkTokenSafety(mint: string) {
-  const res = await fetch(`https://api.jup.ag/ultra/v1/shield?mint=${mint}`);
+  const res = await fetch(
+    `https://api.jup.ag/ultra/v1/shield?mints=${mint}`,
+    { headers: { 'x-api-key': API_KEY } }
+  );
   const data = await res.json();
-  
+
   return {
     isMintable: data.isMintable,      // Can supply increase?
     isFreezable: data.isFreezable,    // Can accounts be frozen?
@@ -315,7 +377,9 @@ orderUrl.searchParams.set('priorityFeeExact', '10000'); // Or exact lamports
 async function safeSwap(inputMint: string, outputMint: string, amount: string, wallet: Keypair) {
   try {
     // Get order
-    const orderRes = await fetch(`https://api.jup.ag/ultra/v1/order?...`);
+    const orderRes = await fetch(`https://api.jup.ag/ultra/v1/order?...`, {
+      headers: { 'x-api-key': API_KEY },
+    });
     const order = await orderRes.json();
     
     if (order.error) {
@@ -329,7 +393,11 @@ async function safeSwap(inputMint: string, outputMint: string, amount: string, w
     }
     
     // Sign and execute...
-    const executeRes = await fetch(`https://api.jup.ag/ultra/v1/execute`, {...});
+    const executeRes = await fetch(`https://api.jup.ag/ultra/v1/execute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+      body: JSON.stringify({ signedTransaction: '...', requestId: order.requestId }),
+    });
     const result = await executeRes.json();
     
     if (result.status === 'Failed') {
@@ -359,32 +427,32 @@ async function safeSwap(inputMint: string, outputMint: string, amount: string, w
 |----------|--------|-------------|
 | `/ultra/v1/order` | GET | Get quote + unsigned transaction |
 | `/ultra/v1/execute` | POST | Execute signed transaction |
-| `/ultra/v1/holdings` | GET | Get wallet token balances |
+| `/ultra/v1/holdings/{address}` | GET | Get wallet token balances |
 | `/ultra/v1/search` | GET | Search tokens by name/symbol/mint |
-| `/ultra/v1/shield` | GET | Token security information |
+| `/ultra/v1/shield?mints=X` | GET | Token security information |
 
-### Jupiter Limit Order API
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/limit/v2/createOrder` | POST | Create limit order |
-| `/limit/v2/cancelOrders` | POST | Cancel orders |
-| `/limit/v2/openOrders` | GET | Get open orders for wallet |
-| `/limit/v2/orderHistory` | GET | Get order history |
-
-### Jupiter DCA API
+### Jupiter Trigger Order API (Limit Orders)
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/dca/v1/create` | POST | Create DCA position |
-| `/dca/v1/close` | POST | Close DCA position |
-| `/dca/v1/user/:wallet` | GET | Get user's DCA positions |
+| `/trigger/v1/createOrder` | POST | Create limit order |
+| `/trigger/v1/cancelOrder` | POST | Cancel an order |
+| `/trigger/v1/getTriggerOrders?user=X&orderStatus=active` | GET | Get active orders for wallet |
+| `/trigger/v1/getTriggerOrders?user=X&orderStatus=history` | GET | Get order history |
+
+### Jupiter Recurring Order API (DCA)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/recurring/v1/createOrder` | POST | Create DCA / recurring position |
+| `/recurring/v1/cancelOrder` | POST | Cancel a recurring position |
+| `/recurring/v1/getRecurringOrders?user=X&orderStatus=active` | GET | Get active recurring positions |
 
 ### Jupiter Price API
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/price/v2?ids=X,Y` | GET | Get token prices |
+| `/price/v3?ids=X,Y` | GET | Get token prices |
 
 ## Troubleshooting
 
@@ -401,7 +469,7 @@ async function safeSwap(inputMint: string, outputMint: string, amount: string, w
 ### "Transaction expired"
 - Blockhash expired before landing
 - Retry immediately
-- Ultra API handles this better than Metis
+- Ultra API handles this better than the Swap API
 
 ### "Insufficient balance"
 - Check SOL for fees (need ~0.01 SOL)

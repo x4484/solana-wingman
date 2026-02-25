@@ -88,8 +88,7 @@
   
   "tools": {
     "anchor": "tools/anchor/",
-    "solana-cli": "tools/solana-cli/",
-    "security": "tools/security/"
+"security": "tools/security/"
   },
   
   "data": {
@@ -111,12 +110,19 @@
     "learn": "prompts/learn-mode.md"
   },
   
+  "skills": [
+    "skills/solana-wingman/SKILL.md",
+    "skills/solana-defi/SKILL.md",
+    "skills/solana-blinks/SKILL.md",
+    "skills/solana-security/SKILL.md"
+  ],
+
   "ide": {
-    "claude": ".claude/skills/solana-wingman/",
+    "claude": ".claude/skills/",
     "cursor": ".cursor/commands/",
-    "codex": ".codex/skills/solana-wingman/",
-    "agents": ".agents/skills/solana-wingman/",
-    "opencode": ".opencode/skills/solana-wingman/"
+    "codex": ".codex/skills/",
+    "agents": ".agents/skills/",
+    "opencode": ".opencode/skills/"
   },
   
   "compatibility": {

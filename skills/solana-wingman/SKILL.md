@@ -1,6 +1,7 @@
 ---
 name: solana-wingman
 description: "Solana development tutor and builder. Teaches smart contract (program) development through Solana-native challenges, Anchor framework, and security best practices."
+metadata: {"clawdbot":{"emoji":"🦾","category":"solana","homepage":"https://github.com/x4484/solana-wingman"}}
 triggers:
   - solana
   - anchor
@@ -97,12 +98,18 @@ Located in `knowledge/challenges/`:
 ## References
 
 - `references/critical-gotchas.md` - Must-know pitfalls
-- `references/account-model.md` - Deep dive on accounts
-- `references/pda-patterns.md` - PDA patterns and examples
+- `../../knowledge/foundations/01-account-model.md` - Deep dive on accounts
+- `../../knowledge/foundations/02-pdas.md` - PDA patterns and examples
 
 ## External Resources
 
 - [Solana Docs](https://solana.com/docs)
-- [Anchor Docs](https://www.anchor-lang.com/)
-- [Solana Cookbook](https://solanacookbook.com/)
+- [Anchor Docs](https://book.anchor-lang.com/)
+- [Solana Cookbook](https://solana.com/developers/cookbook)
 - [Metaplex Docs](https://developers.metaplex.com/)
+
+## Related Skills
+
+- `../solana-defi/SKILL.md` - Jupiter DeFi integrations
+- `../solana-blinks/SKILL.md` - Blinks & Actions builder
+- `../solana-security/SKILL.md` - Security auditor

@@ -3,7 +3,7 @@
 #
 # Usage: ./check-gotchas.sh [directory]
 
-set -e
+set -euo pipefail
 
 DIR="${1:-.}"
 ISSUES=0
@@ -120,12 +120,12 @@ if [ $ISSUES -eq 0 ]; then
     echo ""
     echo "Note: This is a basic scan. For production:"
     echo "  - Run a full security audit"
-    echo "  - Review knowledge/gotchas/critical-gotchas.md"
+    echo "  - Review references/critical-gotchas.md"
     echo "  - Consider a professional audit for mainnet"
 else
     echo -e "${YELLOW}⚠️  Found $ISSUES potential issue(s)${NC}"
     echo ""
     echo "Review the warnings above and check:"
-    echo "  - knowledge/gotchas/critical-gotchas.md"
+    echo "  - references/critical-gotchas.md"
     echo "  - prompts/audit-mode.md for full audit"
 fi

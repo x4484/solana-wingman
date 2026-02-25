@@ -20,7 +20,7 @@ interface ActionGetResponse {
   title: string;        // Bold headline
   description: string;  // Supporting text
   label: string;        // Default button text
-  
+
   // Optional
   disabled?: boolean;   // If true, buttons are grayed out
   error?: ActionError;  // Error to display
@@ -32,13 +32,31 @@ interface ActionGetResponse {
 interface LinkedAction {
   label: string;        // Button text
   href: string;         // Action URL (can include query params)
-  parameters?: ActionParameter[];  // User input fields
+  type?: 'transaction' | 'message' | 'post' | 'external-link';
+  parameters?: (ActionParameter | TypedActionParameter)[];
 }
 
 interface ActionParameter {
   name: string;         // Query param name
   label: string;        // Input label
   required?: boolean;   // Default false
+}
+
+// Extended parameter with type and options
+interface TypedActionParameter extends ActionParameter {
+  type?: ActionParameterType;
+  options?: ActionParameterOption[];  // For select, radio, checkbox
+}
+
+type ActionParameterType =
+  | 'text' | 'email' | 'url' | 'number'
+  | 'date' | 'datetime-local' | 'textarea'
+  | 'select' | 'radio' | 'checkbox';
+
+interface ActionParameterOption {
+  label: string;  // Display text
+  value: string;  // Value sent in query param
+  selected?: boolean;  // Pre-selected default
 }
 ```
 
@@ -48,16 +66,49 @@ Client sends:
 ```typescript
 interface ActionPostRequest {
   account: string;      // User's wallet public key (base58)
+  type?: string;        // Request type (e.g. "transaction", "message")
+  data?: unknown;       // Additional data for the request
 }
 ```
 
 ## POST Response
 
-Server returns:
+Server returns one of four response types:
 ```typescript
-interface ActionPostResponse {
+type ActionPostResponse =
+  | TransactionResponse
+  | PostResponse
+  | ExternalLinkResponse
+  | SignMessageResponse;
+
+// Default: return a transaction for the wallet to sign
+interface TransactionResponse {
+  type?: 'transaction';
   transaction: string;  // Base64 encoded serialized transaction
   message?: string;     // Optional message to show user
+  links?: { next: NextAction };  // Chain to next action
+}
+
+// No transaction, just acknowledge and optionally chain
+interface PostResponse {
+  type: 'post';
+  message?: string;
+  links?: { next: NextAction };
+}
+
+// Redirect user to an external URL
+interface ExternalLinkResponse {
+  type: 'external-link';
+  externalLink: string; // URL to open
+  links?: { next: NextAction };
+}
+
+// Ask wallet to sign a plaintext message (not a transaction)
+interface SignMessageResponse {
+  type: 'message';
+  data: string;         // Message to sign
+  state?: string;       // Opaque state token
+  links?: { next: NextAction };
 }
 ```
 
@@ -159,6 +210,86 @@ const base64 = serialized.toString('base64');
 7. Client passes to wallet for signing
 8. Wallet signs and submits to chain
 9. Client shows success/failure
+
+## Action Chaining
+
+Actions can chain together using `links.next` in POST responses. This enables
+multi-step workflows (approve + swap, form + confirm, etc.).
+
+```typescript
+type NextAction = PostNextActionLink | InlineNextActionLink;
+
+// Fetch the next action from a URL
+interface PostNextActionLink {
+  type: 'post';
+  href: string;  // URL to POST to for next action
+}
+
+// Next action provided inline (no extra request needed)
+interface InlineNextActionLink {
+  type: 'inline';
+  action: ActionGetResponse;  // Full action metadata
+}
+
+// Terminal state - workflow is done
+interface CompletedAction {
+  type: 'completed';
+  icon: string;
+  title: string;
+  description: string;
+  label: string;  // Shown as disabled button
+}
+```
+
+The client follows the chain: after each successful transaction, it reads
+`links.next` to determine the next step. If `next` is absent, the workflow
+is complete.
+
+## Rich Input Types
+
+Parameters support typed inputs beyond plain text:
+
+```typescript
+type ActionParameterType =
+  | 'text' | 'email' | 'url' | 'number'
+  | 'date' | 'datetime-local' | 'textarea'
+  | 'select' | 'radio' | 'checkbox';
+```
+
+For `select`, `radio`, and `checkbox`, provide an `options` array:
+
+```typescript
+interface ActionParameterSelectable {
+  name: string;
+  label: string;
+  required?: boolean;
+  type: 'select' | 'radio' | 'checkbox';
+  options: ActionParameterOption[];
+}
+
+interface ActionParameterOption {
+  label: string;        // Display text
+  value: string;        // Value sent as query param
+  selected?: boolean;   // Pre-selected default
+}
+```
+
+Example:
+```typescript
+parameters: [
+  {
+    name: 'token',
+    label: 'Select token',
+    type: 'select',
+    required: true,
+    options: [
+      { label: 'SOL', value: 'SOL', selected: true },
+      { label: 'USDC', value: 'USDC' },
+      { label: 'BONK', value: 'BONK' },
+    ],
+  },
+]
+```
 
 ## Validation Checklist
 
